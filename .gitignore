@@ -3,6 +3,21 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Model files
+*.pth
+*.pt
+*.ckpt
+
+# Data directories 
+data/train/
+data/test/
+data/val/
+dataset/
+
+# Temporary directories
+/tmp/
+temp/
+
 # C extensions
 *.so
 
