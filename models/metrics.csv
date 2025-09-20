@@ -1,0 +1,17 @@
+metric,value,class
+accuracy,0.9892,overall
+precision_weighted,0.989237886581937,overall
+recall_weighted,0.9892,overall
+f1_weighted,0.9891997909079521,overall
+precision,0.993543179983858,cats
+recall,0.9848,cats
+f1_score,0.9891522699879469,cats
+support,1250.0,cats
+precision,0.9849325931800159,dogs
+recall,0.9936,dogs
+f1_score,0.989247311827957,dogs
+support,1250.0,dogs
+confusion_matrix_cats_predicted_as_cats,1231.0,confusion_matrix
+confusion_matrix_cats_predicted_as_dogs,19.0,confusion_matrix
+confusion_matrix_dogs_predicted_as_cats,8.0,confusion_matrix
+confusion_matrix_dogs_predicted_as_dogs,1242.0,confusion_matrix

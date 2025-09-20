@@ -1,0 +1,26 @@
+services:
+  airflow:
+    image: apache/airflow:3.1.0rc1-python3.12
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: sqlite:////opt/airflow/airflow.db
+      AIRFLOW__CORE__EXECUTOR: SequentialExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      _AIRFLOW_DB_MIGRATE: 'true'
+      _AIRFLOW_WWW_USER_CREATE: 'true'
+      _AIRFLOW_WWW_USER_USERNAME: admin
+      _AIRFLOW_WWW_USER_PASSWORD: admin
+      TRAINING_CONFIG_PATH: /opt/airflow/code/models/config.json
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ../../data:/opt/airflow/data
+      - ../../code:/opt/airflow/code
+      - ../../models:/opt/airflow/models
+      - ../../runs:/opt/airflow/runs
+      - ../../requirements.txt:/opt/airflow/requirements.txt
+    ports:
+      - "8080:8080"
+    command: >
+      bash -c "pip install --no-cache-dir -r /opt/airflow/requirements.txt && 
+        airflow standalone"

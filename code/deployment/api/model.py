@@ -6,7 +6,7 @@ import torch.nn as nn
 from PIL import Image
 from torchvision import models, transforms
 
-MODEL_PATH: str = os.getenv("MODEL_PATH", "/app/models/cats_dogs_model.pth")
+MODEL_PATH: str = os.getenv("MODEL_PATH", "/models/cats_dogs_model.pth")
 DEVICE: str = os.getenv("DEVICE", "cpu")
 
 
@@ -61,5 +61,4 @@ def predict_image(image: Image.Image) -> tp.Dict[str, tp.Any]:
     }
 
     prediction: str = max(probs_dict, key=probs_dict.get)
-
     return {"prediction": prediction, "probabilities": probs_dict}
