@@ -4,7 +4,8 @@ __pycache__/
 *$py.class
 
 # To avoid storing large dataset in GitHub
-data
+data/raw
+data/processed
 services/airflow/logs
 runs
 
