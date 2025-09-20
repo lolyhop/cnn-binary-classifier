@@ -1,3 +1,5 @@
+import subprocess
+import zipfile
 from datetime import datetime
 from pathlib import Path
 import typing as tp
@@ -17,16 +19,68 @@ BASE_PATH = Path("/opt/airflow/data")
 RAW_PATH = BASE_PATH / "raw" / "PetImages"
 PROCESSED_PATH = BASE_PATH / "processed"
 
+def download_dataset() -> None:
+    """Download and extract the cats vs dogs dataset"""
+    print("No dataset found. Downloading cats vs dogs dataset...")
+    
+    (BASE_PATH / "raw").mkdir(parents=True, exist_ok=True)
+    dataset_zip = BASE_PATH / "raw" / "dataset.zip"
+    
+    try:
+        subprocess.run([
+            "curl", "-L", "-o", str(dataset_zip),
+            "https://www.kaggle.com/api/v1/datasets/download/bhavikjikadara/dog-and-cat-classification-dataset"
+        ], check=True, cwd=str(BASE_PATH))
+        
+        print("Extracting dataset...")
+        with zipfile.ZipFile(dataset_zip, 'r') as zip_ref:
+            zip_ref.extractall(BASE_PATH / "raw")
+        
+        print("Dataset downloaded and extracted successfully")
+        
+        dataset_zip.unlink()
+        
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to download dataset: {e}")
+        raise
+    except zipfile.BadZipFile as e:
+        print(f"Failed to extract dataset: {e}")
+        raise
 
 def extract_images(**context) -> tp.Dict[str, tp.List[str]]:
     """Load all images from Cat and Dog folders"""
-    cats = [str(p) for p in (RAW_PATH / "Cat").glob("*.jpg")]
-    dogs = [str(p) for p in (RAW_PATH / "Dog").glob("*.jpg")]
-
+    
+    # Check if folders exist and have images
+    cat_folder = RAW_PATH / "Cat"
+    dog_folder = RAW_PATH / "Dog"
+    
+    cats = []
+    dogs = []
+    
+    if cat_folder.exists():
+        cats = [str(p) for p in cat_folder.glob("*.jpg")]
+    
+    if dog_folder.exists():
+        dogs = [str(p) for p in dog_folder.glob("*.jpg")]
+    
+    # If no images found, download the dataset
+    if len(cats) == 0 and len(dogs) == 0:
+        download_dataset()
+        
+        # Try loading again after download
+        if cat_folder.exists():
+            cats = [str(p) for p in cat_folder.glob("*.jpg")]
+        
+        if dog_folder.exists():
+            dogs = [str(p) for p in dog_folder.glob("*.jpg")]
+    
     result = {"cats": cats, "dogs": dogs}
     print(f"Loaded: {len(cats)} cats, {len(dogs)} dogs")
+    
+    if len(cats) == 0 and len(dogs) == 0:
+        raise ValueError("No images found even after download attempt")
+    
     return result
-
 
 def clean_images(**context) -> tp.Dict[str, tp.Any]:
     """Clean data by removing corrupted images"""
@@ -61,7 +115,6 @@ def clean_images(**context) -> tp.Dict[str, tp.Any]:
     )
 
     return result
-
 
 def split_dataset(**context) -> str:
     """Split cleaned data into train/val/test (70/20/10) and save"""
@@ -112,8 +165,8 @@ def split_dataset(**context) -> str:
     }
 
     result = f"Dataset split complete - Train: {stats['train']}, Val: {stats['val']}, Test: {stats['test']}"
+    print(result)
     return result
-
 
 extract_task = PythonOperator(
     task_id="extract", python_callable=extract_images, dag=dag

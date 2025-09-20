@@ -9,6 +9,10 @@ services:
       _AIRFLOW_WWW_USER_CREATE: 'true'
       _AIRFLOW_WWW_USER_USERNAME: admin
       _AIRFLOW_WWW_USER_PASSWORD: admin
+      _AIRFLOW_WWW_USER_EMAIL: admin@admin.com
+      _AIRFLOW_WWW_USER_FIRSTNAME: Admin
+      _AIRFLOW_WWW_USER_LASTNAME: Admin
+      _AIRFLOW_WWW_USER_ROLE: Admin
       TRAINING_CONFIG_PATH: /opt/airflow/code/models/config.json
     volumes:
       - ./dags:/opt/airflow/dags
@@ -19,8 +23,11 @@ services:
       - ../../models:/opt/airflow/models
       - ../../runs:/opt/airflow/runs
       - ../../requirements.txt:/opt/airflow/requirements.txt
+    privileged: true
+    shm_size: 8g
     ports:
       - "8080:8080"
     command: >
       bash -c "pip install --no-cache-dir -r /opt/airflow/requirements.txt && 
         airflow standalone"
+
